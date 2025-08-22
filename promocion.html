@@ -904,9 +904,27 @@
     if (!/^\d{2}\/\d{2}$/.test(fechaVencimiento)) { alert('Por favor ingresa una fecha de vencimiento válida (MM/AA)'); return; }
     if (!/^\d{3,4}$/.test(cvv)) { alert('Por favor ingresa un CVV válido (3 o 4 dígitos)'); return; }
 
-    alert('¡Pago procesado con éxito! Redirigiendo...');
-    cerrarPagoModal();
-    setTimeout(function(){ window.location.href = 'gracias.html'; }, 1000);
+    // Enviar pedido a Formspree y luego redirigir
+    const payload = {
+      nombreCliente: (pedidoActual && pedidoActual.nombreCliente) || '',
+      producto: (pedidoActual && pedidoActual.producto) || '',
+      cantidad: String((pedidoActual && pedidoActual.cantidad) || ''),
+      direccion: (pedidoActual && pedidoActual.direccion) || '',
+      total: pedidoActual ? pedidoActual.total.toFixed(2) : '',
+      origen: 'promocion.html'
+    };
+
+    fetch('https://formspree.io/f/manbodjy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(function(err){
+      console.warn('Error enviando a Formspree:', err);
+    }).finally(function(){
+      alert('¡Pago procesado con éxito! Redirigiendo...');
+      cerrarPagoModal();
+      setTimeout(function(){ window.location.href = 'gracias.html'; }, 800);
+    });
   }
 
   // Cerrar modales al hacer clic fuera
