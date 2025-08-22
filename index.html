@@ -1305,19 +1305,30 @@
       return;
     }
     
-    // Aquí iría la lógica real de procesamiento de pago
-    // Por ahora, simulamos un procesamiento exitoso
-    
-    // Mostrar mensaje de éxito
-    alert('¡Pago procesado con éxito! Redirigiendo...');
-    
-    // Cerrar el modal de pago
-    cerrarPagoModal();
-    
-    // Redirigir a la página de agradecimiento
-    setTimeout(function() {
-      window.location.href = 'gracias.html';
-    }, 1000);
+    // Enviar pedido a Formspree
+    const payload = {
+      nombreCliente: (pedidoActual && pedidoActual.nombreCliente) || '',
+      producto: (pedidoActual && pedidoActual.producto) || '',
+      cantidad: String((pedidoActual && pedidoActual.cantidad) || ''),
+      direccion: (pedidoActual && pedidoActual.direccion) || '',
+      total: pedidoActual ? pedidoActual.total.toFixed(2) : '',
+      origen: 'index.html'
+    };
+
+    fetch('https://formspree.io/f/manbodjy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }).catch(function(err){
+      console.warn('Error enviando a Formspree:', err);
+    }).finally(function(){
+      alert('¡Pago procesado con éxito! Redirigiendo...');
+      cerrarPagoModal();
+      setTimeout(function() { window.location.href = 'gracias.html'; }, 800);
+    });
   }
 
   function redirigirGracias() {
